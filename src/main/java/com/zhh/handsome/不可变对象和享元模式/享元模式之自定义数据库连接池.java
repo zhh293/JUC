@@ -1,3 +1,13 @@
+package com.zhh.handsome.不可变对象和享元模式;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 // 连接池配置类：存储数据库连接信息和池参数
 class PoolConfig {
     // 数据库连接配置
