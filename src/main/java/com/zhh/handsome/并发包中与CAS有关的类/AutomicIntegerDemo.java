@@ -1,6 +1,17 @@
 package com.zhh.handsome.并发包中与CAS有关的类;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class AutomicIntegerDemo {
+    public static void main(String[] args) {
+        AtomicInteger at=new AtomicInteger(0);
+        at.incrementAndGet();
+        at.decrementAndGet();
+//        at.compareAndSet(a, a + 1);
+        at.get();
+        at.updateAndGet(a -> a + 1);
+    }
+
 }
 
 
