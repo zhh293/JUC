@@ -6,8 +6,13 @@ import java.util.concurrent.RecursiveTask;
 public class Demo {
     public static void main(String[] args) {
         ForkJoinPool pool = new ForkJoinPool(2); // 只创建2个线程，方便观察
-        SumTask task = new SumTask(1, 10000);
-        Long total = pool.invoke(task);
+//        SumTask task = new SumTask(1, 10000);
+        long[]array=new long[10001];
+        for(int i=0;i<10001;i++){
+            array[i]=i;
+        }
+        FindMax task = new FindMax(0, 10000,array);
+        Integer total = pool.invoke(task);
         System.out.println("最终结果：" + total);
         pool.shutdown();
     }
@@ -53,6 +58,40 @@ class SumTask extends RecursiveTask<Long> {
     }
 }
 
+class FindMax extends RecursiveTask<Integer> {
+    private static final long THRESHOLD = 1000;
+    private long start;
+    private long end;
+    private long[] array;
+    public FindMax(long start, long end,long[]array) {
+        this.start = start;
+        this.end = end;
+        this.array = array;
+    }
+    @Override
+    protected Integer compute() {
+        if(end - start <= THRESHOLD){
+            long max=array[(int) start];
+            for(long i=start;i<=end;i++){
+                if(array[(int) i]>max){
+                    max=array[(int) i];
+                }
+            }
+            return (int) max;
+        }else{
+            long mid = (start + end) / 2;
+            FindMax leftTask = new FindMax(start, mid,array);
+            FindMax rightTask = new FindMax(mid + 1, end,array);
+            leftTask.fork();
+            rightTask.fork();
+
+            Integer leftResult = leftTask.join();
+            Integer rightResult = rightTask.join();
+            System.out.println(Thread.currentThread().getName() + " 汇总：" + start + "-" + mid + " + " + (mid+1) + "-" + end + " = " + (leftResult+rightResult));
+            return Math.max(leftResult,rightResult);
+        }
+    }
+}
 
 
 //你想让我用八十岁老奶奶能听懂的大白话，讲讲 ForkJoin 线程池到底是个啥，不用任何难懂的专业词，保证你一听就明白 —— 咱就拿生活里做家务、干活的事儿来讲，包你听懂～
