@@ -51,6 +51,67 @@ plaintext
 
 
 
+事实上，真正的源码也是上述逻辑，只不过代码写的更加规范罢了
+上述是否尝试修改state的操作在源码中是这么写的
+
+
+Sync抽象类中
+final void lock() {
+            if (!initialTryLock())
+                acquire(1);
+        }
+
+abstract boolean initialTryLock();
+
+
+实现类中的initial方法是这么重写的
+static final class NonfairSync extends Sync {
+        private static final long serialVersionUID = 7316153563782823691L;
+
+        final boolean initialTryLock() {
+            Thread current = Thread.currentThread();
+            if (compareAndSetState(0, 1)) { // first attempt is unguarded
+                setExclusiveOwnerThread(current);
+                return true;
+            } else if (getExclusiveOwnerThread() == current) {
+                int c = getState() + 1;
+                if (c < 0) // overflow
+                    throw new Error("Maximum lock count exceeded");
+                setState(c);
+                return true;
+            } else
+                return false;
+        }
+  }
+
+
+
+
+static final class FairSync extends Sync {
+        private static final long serialVersionUID = -3000897897090466540L;
+
+        /**
+         * Acquires only if reentrant or queue is empty.
+         */
+        final boolean initialTryLock() {
+            Thread current = Thread.currentThread();
+            int c = getState();
+            if (c == 0) {
+                if (!hasQueuedThreads() && compareAndSetState(0, 1)) {
+                    setExclusiveOwnerThread(current);
+                    return true;
+                }
+            } else if (getExclusiveOwnerThread() == current) {
+                if (++c < 0) // overflow
+                    throw new Error("Maximum lock count exceeded");
+                setState(c);
+                return true;
+            }
+            return false;
+        }
+ }
+
+
 
 2. lockInterruptibly ()：可中断加锁
 作用：获取锁，抢不到就阻塞，但支持「线程中断」（中断后抛异常，停止等待）—— 解决 synchronized “死等” 的痛点。
@@ -72,13 +133,13 @@ ReentrantLock 源码实现：
 java
 运行
 public boolean tryLock() {
-    // 调用Sync的非公平抢锁方法（不管公平锁还是非公平锁，tryLock都是非公平）
-    return sync.nonfairTryAcquire(1);
+    // 调用Sync的非公平抢锁方法（不管公平锁还是非公平锁，tryLock都是非公平），即公平锁和非公平锁这段的逻辑都是这样的,所以直接在sync抽象类中直接写好逻辑就行了，继承类不用再重写。符合设计模式中的单一职责原则
+    return sync.tryLock(1);
 }
 nonfairTryAcquire (1) 核心源码（可重入的关键）：
 java
 运行
-final boolean nonfairTryAcquire(int acquires) {
+final boolean tryLock(int acquires) {
     final Thread current = Thread.currentThread();
     int c = getState(); // 获取AQS的state（0=无锁，>0=有锁）
     // 情况1：无锁，CAS抢锁
