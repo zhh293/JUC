@@ -1,3 +1,4 @@
+/*
 package com.zhh.handsome.不可变对象和享元模式;
 
 import java.lang.reflect.InvocationHandler;
@@ -249,3 +250,4 @@ public class TestBasicPool {
 
 
 
+*/

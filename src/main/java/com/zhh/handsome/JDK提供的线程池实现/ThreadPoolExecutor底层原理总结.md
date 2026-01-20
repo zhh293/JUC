@@ -35,7 +35,7 @@
 - `allowCoreThreadTimeOut`
   - 底层细节：为 `true` 时核心线程也用 `poll(keepAliveTime, unit)` 取任务并允许超时退出。
   - 作用：低负载场景下降低核心线程常驻成本。
-  - 关联：`getTask()`、`runWorker()`。
+  - 关联：`getTask()`、`runWorker()`。                                                             
 
 - `ctl`（线程池状态与工作线程计数复合变量）
   - 底层细节：高位记录运行状态（`RUNNING/SHUTDOWN/STOP/TIDYING/TERMINATED`），低位记录 `workerCount`；所有增减用 CAS 保证并发安全。
