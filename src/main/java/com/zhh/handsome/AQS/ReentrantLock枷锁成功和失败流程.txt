@@ -203,6 +203,19 @@ private final boolean parkAndCheckInterrupt() {
 当前线程进入阻塞状态，暂停执行，直到以下两种情况之一发生：
 持有锁的线程释放锁，调用unparkSuccessor()唤醒当前线程，重新自旋抢锁；
 其他线程调用当前线程的interrupt()，线程被唤醒并标记中断（acquireQueued返回 true，最终执行selfInterrupt()补全中断）。
+
+
+
+
+
+
+
+
+
+
+
+
+
 二、公平锁（FairSync）加锁流程（核心差异）
 公平锁的核心是 “排队不插队”，加锁流程与非公平锁的唯一差异在tryAcquire()方法，其余失败流程完全一致：
 步骤 1：FairSync.lock ()（无插队逻辑）
